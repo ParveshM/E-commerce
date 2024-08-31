@@ -4,6 +4,7 @@ import User from "../models/Users";
 import CustomError from "../utils/customError";
 import { comparePassword } from "../utils/hashPassword";
 import { generateToken } from "../utils/generateToken";
+import { matchedData, validationResult } from "express-validator";
 
 /**
  * * METHOD: POST
@@ -11,6 +12,8 @@ import { generateToken } from "../utils/generateToken";
  */
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return next(errors);
     const isEmailExist = await User.findOne({ email: req.body.email });
     if (isEmailExist)
       return next(
@@ -33,7 +36,10 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return next(errors);
+
+    const { email, password } = matchedData(req);
 
     const isEmailExist = await User.findOne({ email });
     if (!isEmailExist)
@@ -50,7 +56,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         new CustomError("Invalid credentials", HttpStatus.BAD_REQUEST)
       ); // if password does not match returning error
 
-    const access_token = generateToken({ email, id: isEmailExist?.id });
+    const access_token = generateToken({
+      email,
+      role: "user",
+      id: isEmailExist?.id,
+    });
     return res.status(HttpStatus.OK).json({
       success: true,
       access_token,
