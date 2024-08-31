@@ -35,3 +35,18 @@ export default async function authenticateUser(
     next(new CustomError("Token is not valid", HttpStatus.FORBIDDEN));
   }
 }
+
+export function authorizeRole(requiredRole: "user" | "admin") {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const userRole = req.user.role;
+
+    if (userRole !== requiredRole) {
+      return new CustomError(
+        "You are not allowed to access this resource",
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    next();
+  };
+}
