@@ -1,7 +1,7 @@
 
 # E-commerce
 
-TA simple e-commerce application built with MERN Stack.
+A simple e-commerce application built with MERN Stack.
 
 ##### Technologies Used 🛠️
 
