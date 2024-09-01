@@ -7,7 +7,6 @@ import CustomError from "./utils/customError";
 import { HttpStatus } from "./types/HttpStatus";
 import errorHandlingMidleware from "./middlewares/errorHandler";
 import userRouter from "./routes/user.routes";
-import adminRouter from "./routes/admin.routes";
 import productsRouter from "./routes/product.routes";
 const app = express();
 
@@ -20,7 +19,6 @@ app.use(
 app.use(morgan("dev"));
 app.use(express.json());
 app.use("/api", userRouter);
-app.use("/api/admin", adminRouter);
 app.use("/api/products", productsRouter);
 
 app.all("*", (req, res, next) =>

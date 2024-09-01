@@ -5,6 +5,7 @@ import CustomError from "../utils/customError";
 import { comparePassword } from "../utils/hashPassword";
 import { generateToken } from "../utils/generateToken";
 import { matchedData, validationResult } from "express-validator";
+import ENV from "../config/ENV";
 
 /**
  * * METHOD: POST
@@ -40,6 +41,20 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     if (!errors.isEmpty()) return next(errors);
 
     const { email, password } = matchedData(req);
+
+    if (email === ENV.ADMIN_EMAIL) {
+      if (password !== ENV.ADMIN_PASSWORD) {
+        return next(
+          new CustomError("Invalid credentials", HttpStatus.BAD_REQUEST)
+        );
+      }
+      const access_token = generateToken({ email, role: "admin" });
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        access_token,
+        message: "Login success",
+      });
+    }
 
     const isEmailExist = await User.findOne({ email });
     if (!isEmailExist)
