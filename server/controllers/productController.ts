@@ -9,15 +9,25 @@ import { HttpStatus } from "../types/HttpStatus";
  */
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const page = req.query.page || 1;
-    const currPage = +page;
-    const limit = 5;
+    const { page, category } = req.query as unknown as {
+      page: number;
+      category: string;
+    };
+    const currPage = +page || 1;
+    const limit = 1;
     const skip = limit * (currPage - 1);
-    const products = await Products.find().skip(skip).limit(limit);
-    return res.json({
+
+    const filter: Record<string, string> = {};
+    if (category) filter.category = category;
+
+    const products = await Products.find(filter).skip(skip).limit(limit);
+    const totalPages = await Products.countDocuments();
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: "Products fetched successfully",
       products,
+      totalPages,
+      limit,
     });
   } catch (error) {
     next(error);
@@ -36,7 +46,7 @@ const singleProduct = async (
   try {
     const { productId } = req.params;
     const product = await Products.findById(productId);
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: "Product fetched successfully",
       product,
@@ -65,7 +75,7 @@ const createProduct = async (
       );
     }
     const newProduct = await Products.create(req.body);
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: "Product added successfully",
       newProduct,
